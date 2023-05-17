@@ -83,11 +83,13 @@
                         */
                         setRedraw();
                         textCanvas.style.display = "block";
+                        console.log(puzzleWidth,puzzleHeight);
                         createTitle(titleText,textStage);
                         buildPieces();
                     }
 
                     function createTitle(msg,stage) {
+                        stage.clearRect(0,0,puzzleWidth,puzzleHeight);
                         stage.fillStyle = "#000000";
                         stage.globalAlpha = 0.4;
                         stage.fillRect(100,puzzleHeight - 40,puzzleWidth - 200, 40);
