@@ -24,7 +24,7 @@
         const textStage = textCanvas.getContext("2d");
         const img = new Image();
 
-        let difficulty = 4;
+        let difficulty = 6;
         let pieces;
         let puzzleWidth;
         let puzzleHeight;
@@ -388,11 +388,12 @@
 
                     function updateDifficulty(e) {
                         difficulty = e.target.value;
-                        pieceWidth = Math.floor(img.width / difficulty);
-                        pieceHeight = Math.floor(img.height / difficulty);
+                        pieceWidth = Math.floor(video.videoWidth / difficulty);
+                        pieceHeight = Math.floor(video.videoHeight / difficulty);
                         puzzleWidth = pieceWidth * difficulty;
                         puzzleHeight = pieceHeight * difficulty;
                         gameOver();
+                        
                     }
 
                     function drawTiles(){
