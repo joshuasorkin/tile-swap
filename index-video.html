@@ -15,8 +15,10 @@
 
     </div>
     <br />
-    <label for="difficulty">Difficulty</label>
-    <input type="range" min="2" max="16" value="4" id="difficulty" />
+    <div id="difficultyDiv">
+        <label for="difficulty">Difficulty</label>
+        <input type="range" min="2" max="16" value="4" id="difficulty" />
+    </div>
     <script>
         const PUZZLE_HOVER_TINT = '#009900';
         //canvas = document.getElementById("canvas");
@@ -146,6 +148,7 @@
                         if (e.srcElement.id !== "textCanvas"){
                             return;
                         }
+                        difficultyDiv.style.display = "none"
                         console.log(`x: ${e.offsetX} y: ${e.offsetY}`);
                         console.log("shuffling...");
                         textCanvas.style.display = "none";
