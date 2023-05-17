@@ -140,6 +140,7 @@
                     //so we would call pieces.shuffle();
 
                     function shufflePuzzle(e){
+                        hideDifficulty();
                         console.log({e});
                         if (e.srcElement.id !== "textCanvas"){
                             return;
@@ -382,6 +383,7 @@
                         document.onpointerdown = null;
                         document.onpointermove = null;
                         document.onpointerup = null;
+                        showDifficulty();
                         console.log("initializing puzzle...");
                         initPuzzle();
                     }
@@ -432,6 +434,19 @@
                             }, 1000/30);
                         }
                     }
+
+                    function hideDifficulty(){
+                        const element = document.querySelector("#difficulty");
+                        element.style.pointerEvents = 'none';
+                        element.style.opacity = 0;
+                    }
+
+                    function showDifficulty(){
+                        const element = document.querySelector("#difficulty");
+                        element.style.pointerEvents = 'auto';
+                        element.style.opacity = 1;
+                    }
+
                     setRedraw();
                     document.querySelector("#difficulty").oninput = updateDifficulty;
                 });
