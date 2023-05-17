@@ -140,7 +140,6 @@
                     //so we would call pieces.shuffle();
 
                     function shufflePuzzle(e){
-                        hideDifficulty();
                         console.log({e});
                         if (e.srcElement.id !== "textCanvas"){
                             return;
@@ -383,7 +382,6 @@
                         document.onpointerdown = null;
                         document.onpointermove = null;
                         document.onpointerup = null;
-                        showDifficulty();
                         console.log("initializing puzzle...");
                         initPuzzle();
                     }
