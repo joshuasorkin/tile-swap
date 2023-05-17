@@ -141,11 +141,8 @@
 
                     function shufflePuzzle(e){
                         console.log({e});
-                        if (e.offsetX < canvas.offsetLeft ||
-                            e.offsetX > canvas.offsetLeft + canvas.width ||
-                            e.offsetY < canvas.offsetTop ||
-                            e.offsetY > canvas.offsetTop + canvas.height){
-                                return;
+                        if (e.srcElement.id !== "textCanvas"){
+                            return;
                         }
                         console.log(`x: ${e.offsetX} y: ${e.offsetY}`);
                         console.log("shuffling...");
