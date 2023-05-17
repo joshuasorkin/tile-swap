@@ -205,7 +205,8 @@
                     }
 
                     function onPuzzleClick(e){
-                        if(e.srcElement.id !== "stage" && e.srcElement.id !== "textStage"){
+                        console.log(e.srcElement.id);
+                        if(e.srcElement.id !== "canvas" && e.srcElement.id !== "textCanvas"){
                             return;
                         }
                         clearInterval(intervalID);
