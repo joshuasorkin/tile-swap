@@ -205,6 +205,9 @@
                     }
 
                     function onPuzzleClick(e){
+                        if(e.srcElement.id !== "stage" && e.srcElement.id !== "textStage"){
+                            return;
+                        }
                         clearInterval(intervalID);
                         setMouse(e);
                         currentPiece = checkPieceClicked();
@@ -231,9 +234,6 @@
                             stage.restore();
                             document.onpointermove = updatePuzzle;
                             document.onpointerup = pieceDropped;
-                        }
-                        else{
-                            setRedraw();
                         }
                     }
 
