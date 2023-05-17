@@ -232,6 +232,9 @@
                             document.onpointermove = updatePuzzle;
                             document.onpointerup = pieceDropped;
                         }
+                        else{
+                            setRedraw();
+                        }
                     }
 
                     //TODO: reveal profile text as puzzle gets solved (@)
