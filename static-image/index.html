@@ -1,0 +1,363 @@
+<!--original source code: https://code.tutsplus.com/tutorials/create-an-html5-canvas-tile-swapping-puzzle--active-10747-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tile Swap Puzzle</title>
+</head>
+<body>
+    <div style="position: relative">
+        <!--<canvas id="canvas" style="position:absolute; top:100px; left:100px"></canvas>-->
+        <canvas id="canvas"></canvas>
+    </div>
+    <br />
+    <label for="difficulty">Difficulty</label>
+    <input type="range" min="2" max="16" value="4" id="difficulty" />
+    <script>
+        const PUZZLE_HOVER_TINT = '#009900';
+        //canvas = document.getElementById("canvas");
+        const stage = canvas.getContext("2d");
+        const img = new Image();
+
+        let difficulty = 4;
+        let pieces;
+        let puzzleWidth;
+        let puzzleHeight;
+        let pieceWidth;
+        let pieceHeight;
+        let currentPiece;
+        let currentDropPiece;
+
+        let mouse;
+
+        img.addEventListener('load',onImage,false);
+        img.src = 'profile-resize.jpg';
+
+        function onImage(e){
+            //todo: refactor dimension calculations into their own function
+            pieceWidth = Math.floor(img.width / difficulty);
+            pieceHeight = Math.floor(img.height / difficulty);
+            console.log([pieceWidth,pieceHeight]);
+            puzzleWidth = pieceWidth * difficulty;
+            puzzleHeight = pieceHeight * difficulty;
+            console.log([img.width,puzzleWidth,img.height,puzzleHeight]);
+            setCanvas();
+            initPuzzle();
+        }
+
+        function setCanvas(){
+            canvas.width = puzzleWidth;
+            canvas.height = puzzleHeight;
+            //canvas.width = 700;
+            //canvas.height = 700;
+            canvas.style.border = "1px solid red";
+        }
+
+        function initPuzzle() {
+            pieces = [];
+            mouse = {
+                x: 0,
+                y: 0
+            };
+            currentPiece = null;
+            currentDropPiece = null;
+            //draw the entire image to the canvas
+            stage.drawImage(
+                img,
+                0,
+                0,
+                puzzleWidth,
+                puzzleHeight,
+                0,
+                0,
+                puzzleWidth,
+                puzzleHeight
+            );
+            createTitle("Click to Start Tinder Puzzle");
+            buildPieces();
+        }
+
+        function createTitle(msg) {
+            stage.fillStyle = "#000000";
+            stage.globalAlpha = 0.4;
+            stage.fillRect(100,puzzleHeight - 40,puzzleWidth - 200, 40);
+            stage.fillStyle = "#FFFFFF";
+            stage.globalAlpha = 1;
+            stage.textAlign = "center";
+            stage.textBaseline = "middle";
+            stage.font = "20px Arial";
+            stage.fillText(msg, puzzleWidth / 2, puzzleHeight - 20);
+        }
+
+        //assign initial values to all pieces
+        function buildPieces() {
+            let i;
+            let piece;
+            let xPos = 0;
+            let yPos = 0;
+            //iterate through total piece count
+            //todo: refactor piece count calculator into its own function,
+            //it's a magic number here
+            for (i = 0; i < difficulty ** 2; i++){
+                //create a new default piece
+                //todo: piece should be a class and this is its constructor
+                piece = {};
+                piece.sx = xPos;
+                piece.sy = yPos;
+                //add piece to array of pieces
+                pieces.push(piece);
+                //set xPos to piece's x position in original image
+                xPos += pieceWidth;
+                //check if x position brings us all the way to the right side of the image
+                if (xPos >= puzzleWidth) {
+                    //reset x position to 0
+                    xPos = 0;
+                    //increment y position by 1 piece's worth of height
+                    yPos += pieceHeight;
+                }
+            }
+            console.log({pieces});
+            //set mouse click event handler to shuffle puzzle pieces
+            //todo: check if document.onpointerdown includes
+            //touchscreen taps
+            document.onpointerdown = shufflePuzzle;
+        }
+
+        //todo: pieces should be an obj with CRUD methods
+        //instead of an array (the array should be an object property),
+        //and this should be a method of that obj
+        //so we would call pieces.shuffle();
+
+        function shufflePuzzle(){
+            pieces = shuffleArray(pieces);
+            stage.clearRect(0,0,puzzleWidth,puzzleHeight);
+            let xPos = 0;
+            let yPos = 0;
+            for (const piece of pieces) {
+                piece.xPos = xPos;
+                piece.yPos = yPos;
+                stage.drawImage(
+                    img,
+                    piece.sx,
+                    piece.sy,
+                    pieceWidth,
+                    pieceHeight,
+                    xPos,
+                    yPos,
+                    pieceWidth,
+                    pieceHeight
+                );
+                stage.strokeRect(xPos, yPos, pieceWidth, pieceHeight);
+                //todo: refactor to:
+                //<incrementPiece(xPos,pieceWidth,yPos,pieceHeight)>
+                xPos += pieceWidth;
+                if (xPos >= puzzleWidth) {
+                    xPos = 0;
+                    yPos += pieceHeight;
+                }
+                //<incrementPiece>
+            }
+            document.onpointerdown = onPuzzleClick;
+        }
+
+        function shuffleArray(o){
+            for (var j, x, i = o.length; i; j = parseInt(Math.random() * i), x = o[--i],o[i] = o[j], o[j] = x);
+            //todo: rewrite this as a more readable for loop
+            //for (let index=0; index < o.length; index++){
+
+            //}
+            return o;
+        }
+
+        //
+        function setMouse(e){
+            if (e.offsetX || e.offsetX === 0){
+                console.log([e.offsetX,e.offsetY,canvas.offsetLeft,canvas.offsetTop]);
+                //getting relative position of click, minus position of canvas relative to its container
+                mouse.x = e.offsetX - canvas.offsetLeft;
+                mouse.y = e.offsetY - canvas.offsetTop;
+                console.log({mouse});
+            }
+        }
+
+        function onPuzzleClick(e){
+            setMouse(e);
+            currentPiece = checkPieceClicked();
+            if (currentPiece !== null) {
+                stage.clearRect(
+                    currentPiece.xPos,
+                    currentPiece.yPos,
+                    pieceWidth,
+                    pieceHeight
+                );
+                stage.save();
+                stage.globalAlpha = 0.9;
+                stage.drawImage(
+                    img,
+                    currentPiece.sx,
+                    currentPiece.sy,
+                    pieceWidth,
+                    pieceHeight,
+                    mouse.x - pieceWidth / 2,
+                    mouse.y - pieceHeight / 2,
+                    pieceWidth,
+                    pieceHeight
+                );
+                stage.restore();
+                document.onpointermove = updatePuzzle;
+                document.onpointerup = pieceDropped;
+            }
+        }
+
+        //TODO: reveal profile text as puzzle gets solved (@)
+
+        function checkPieceClicked() {
+            //todo: is there a way to just calculate the piece's index via div/mod/quotient/etc?
+            //iterate through pieces
+            for (const piece of pieces) {
+                //check if mouse click coordinates are outside the boundaries of this piece
+                if (
+                    mouse.x < piece.xPos ||
+                    mouse.x > piece.xPos + pieceWidth ||
+                    mouse.y < piece.yPos ||
+                    mouse.y > piece.yPos + pieceHeight
+                ) {
+                    //piece not clicked
+                }
+                //once we find a piece where the coordinates are in bounds, return that piece as clicked
+                else {
+                    return piece;
+                }
+            }
+            return null;
+        }
+
+        function updatePuzzle(e) {
+            currentDropPiece = null;
+            setMouse(e);
+            stage.clearRect(0,0,puzzleWidth, puzzleHeight);
+            for (const piece of pieces) {
+                if (piece === currentPiece) {
+                    continue;
+                }
+                stage.drawImage(
+                    img,
+                    piece.sx,
+                    piece.sy,
+                    pieceWidth,
+                    pieceHeight,
+                    piece.xPos,
+                    piece.yPos,
+                    pieceWidth,
+                    pieceHeight
+                );
+                stage.strokeRect(piece.xPos,piece.yPos,pieceWidth,pieceHeight);
+                if (currentDropPiece === null) {
+                    if (
+                        mouse.x < piece.xPos ||
+                        mouse.x > piece.xPos + pieceWidth ||
+                        mouse.y < piece.yPos ||
+                        mouse.y > piece.yPos + pieceHeight
+                    ) {
+                        //NOT OVER
+                    }
+                    else {
+                        currentDropPiece = piece;
+                        stage.save();
+                        stage.globalAlpha = 0.4;
+                        stage.fillStyle = PUZZLE_HOVER_TINT;
+                        stage.fillRect(
+                            currentDropPiece.xPos,
+                            currentDropPiece.yPos,
+                            pieceWidth,
+                            pieceHeight
+                        );
+                        stage.restore();
+                    }
+                }
+            }
+            stage.save();
+            stage.globalAlpha = 0.6;
+            stage.drawImage(
+                img,
+                currentPiece.sx,
+                currentPiece.sy,
+                pieceWidth,
+                pieceHeight,
+                mouse.x - pieceWidth / 2,
+                mouse.y - pieceHeight / 2,
+                pieceWidth,
+                pieceHeight
+            );
+            stage.restore();
+            stage.strokeRect(
+                mouse.x - pieceWidth / 2,
+                mouse.y - pieceHeight / 2,
+                pieceWidth,
+                pieceHeight
+            );
+        }
+
+        function pieceDropped(e){
+            document.onpointermove = null;
+            document.onpointerup = null;
+            if(currentDropPiece !== null){
+                let tmp = {
+                    xPos:currentPiece.xPos,
+                    yPos:currentPiece.yPos
+                };
+                currentPiece.xPos = currentDropPiece.xPos;
+                currentPiece.yPos = currentDropPiece.yPos;
+                currentDropPiece.xPos = tmp.xPos;
+                currentDropPiece.yPos = tmp.yPos;
+            }
+            resetPuzzleAndCheckWin();
+        }
+
+        function resetPuzzleAndCheckWin(){
+            stage.clearRect(0,0,puzzleWidth,puzzleHeight);
+            let gameWin = true;
+            for (piece of pieces) {
+                stage.drawImage(
+                    img,
+                    piece.sx,
+                    piece.sy,
+                    pieceWidth,
+                    pieceHeight,
+                    piece.xPos,
+                    piece.yPos,
+                    pieceWidth,
+                    pieceHeight
+	    	    );
+		        stage.strokeRect(piece.xPos, piece.yPos, pieceWidth, pieceHeight);
+		        if (piece.xPos != piece.sx || piece.yPos != piece.sy) {
+			        gameWin = false;
+		        }
+            }
+            if (gameWin) {
+		        setTimeout(gameOver, 500);
+	        }
+        }
+
+        function gameOver() {
+            document.onpointerdown = null;
+            document.onpointermove = null;
+            document.onpointerup = null;
+            initPuzzle();
+        }
+
+        function updateDifficulty(e) {
+            difficulty = e.target.value;
+            pieceWidth = Math.floor(img.width / difficulty);
+            pieceHeight = Math.floor(img.height / difficulty);
+            puzzleWidth = pieceWidth * difficulty;
+            puzzleHeight = pieceHeight * difficulty;
+            gameOver();
+        }
+        document.querySelector("#difficulty").oninput = updateDifficulty;
+
+    </script>
+</body>
+</html>
